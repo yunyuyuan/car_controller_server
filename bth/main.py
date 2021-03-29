@@ -1,6 +1,9 @@
 import bluetooth
 
 from car_control import CarController
+import subprocess
+
+subprocess.call(['sudo', 'hciconfig', 'hci0', 'piscan'])
 
 
 class BthClient(object):
