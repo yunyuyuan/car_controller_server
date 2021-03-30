@@ -1,6 +1,5 @@
 import RPi.GPIO as GPIO
 import time
-from threading import Event
 
 IN1 = 11
 IN2 = 12
@@ -20,9 +19,8 @@ class CarController(object):
         self.pwm_right = None
         self.steer = None
         self.setup()
-        self.last_time = 0
-        self.lock2 = Event()
-        self.lock2.set()
+        self.speed_strength = 1
+        self.max_steer_angle = 15
 
     @staticmethod
     def set_motor(w1, w2, w3, w4):
@@ -56,11 +54,15 @@ class CarController(object):
         self.stop()
 
     def parse_req(self, data):
-        print(data)
+        value = data['vale']
         if data['type'] == 'left-right':
-            pass
+            self.left_right(value)
         elif data['type'] == 'forward-backward':
-            self.forward_backward(data['value'])
+            self.forward_backward(value)
+        elif data['type'] == 'speed-strength':
+            self.speed_strength = value
+        elif data['type'] == 'steer-angle':
+            self.max_steer_angle = value
 
     '''
         control
@@ -69,9 +71,6 @@ class CarController(object):
         """
         前后
         """
-        if not self.lock2.is_set:
-            self.lock2.wait()
-        self.lock2.clear()
         if val > 0:
             self.backward()
         elif val < 0:
@@ -79,33 +78,22 @@ class CarController(object):
         else:
             self.stop()
             return
-        self.change_speed_strength(10*abs(val))
-        self.lock2.set()
+        self.change_speed_strength(10*abs(val)/(5/self.speed_strength))
 
     def left_right(self, val):
         """
         左右
         """
-        time_now = time.time()
-        if time_now - self.last_time <= 0.1:
-            return
-        self.last_time = time_now
-        deg = 90-val*30
+        deg = 90-(val/10)*self.max_steer_angle
         degrees = 2.5+deg*10/180
         self.steer.ChangeDutyCycle(degrees)
 
     def change_speed_strength(self, speed):
         """
-        速度倍率
+        速度
         """
         self.pwm_left.ChangeDutyCycle(speed)
         self.pwm_right.ChangeDutyCycle(speed)
-
-    def change_steer_angle(self, val):
-        """
-        转弯角度
-        """
-        pass
 
     @staticmethod
     def destroy():
