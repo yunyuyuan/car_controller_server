@@ -7,7 +7,6 @@ class BthClient(object):
         self.server_sock.bind(("", bluetooth.PORT_ANY))
         self.server_sock.listen(1)
         print("listen")
-        
         self.just_connect = just_connect
         if not just_connect:
             from car_control import CarController

@@ -54,7 +54,7 @@ class CarController(object):
         self.stop()
 
     def parse_req(self, data):
-        value = data['vale']
+        value = data['value']
         if data['type'] == 'left-right':
             self.left_right(value)
         elif data['type'] == 'forward-backward':
