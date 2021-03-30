@@ -7,14 +7,7 @@ class BthClient(object):
         self.server_sock.bind(("", bluetooth.PORT_ANY))
         self.server_sock.listen(1)
         print("listen")
-
-        uuid = "00001101-0000-1000-8000-00805F9B34FB"
-
-        bluetooth.advertise_service(self.server_sock, "CarServer",
-                                    service_id=uuid,
-                                    service_classes=[uuid, bluetooth.SERIAL_PORT_CLASS],
-                                    profiles=[bluetooth.SERIAL_PORT_PROFILE])
-        print("advertise")
+        
         self.just_connect = just_connect
         if not just_connect:
             from car_control import CarController
@@ -22,6 +15,13 @@ class BthClient(object):
 
             subprocess.call(['sudo', 'hciconfig', 'hci0', 'piscan'])
             self.controller = CarController()
+        uuid = "00001101-0000-1000-8000-00805F9B34FB"
+
+        bluetooth.advertise_service(self.server_sock, "CarServer",
+                                    service_id=uuid,
+                                    service_classes=[uuid, bluetooth.SERIAL_PORT_CLASS],
+                                    profiles=[bluetooth.SERIAL_PORT_PROFILE])
+        print("advertise")
 
     def run(self):
         while 1:
