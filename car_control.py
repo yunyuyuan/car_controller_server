@@ -78,7 +78,7 @@ class CarController(object):
         else:
             self.stop()
             return
-        self.change_speed_strength(10*abs(val)/(5/self.speed_strength))
+        self.change_speed_strength(10*abs(val)/(8/self.speed_strength))
 
     def left_right(self, val):
         """
