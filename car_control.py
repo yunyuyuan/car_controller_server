@@ -20,7 +20,8 @@ class CarController(object):
         self.steer = None
         self.setup()
         self.speed_strength = 1
-        self.max_steer_angle = 15
+        self.max_steer_angle = 30
+        self.margin = -5
 
     @staticmethod
     def set_motor(w1, w2, w3, w4):
@@ -32,11 +33,11 @@ class CarController(object):
     def stop(self):
         self.set_motor(0, 0, 0, 0)
 
-    def forward(self):
-        self.set_motor(1, 0, 0, 1)
-
     def backward(self):
-        self.set_motor(0, 1, 1, 0)
+        self.set_motor(1, 0, 1, 0)
+
+    def forward(self):
+        self.set_motor(0, 1, 0, 1)
 
     def setup(self):
         GPIO.setmode(GPIO.BOARD)
@@ -84,7 +85,7 @@ class CarController(object):
         """
         左右
         """
-        deg = 90-(val/10)*self.max_steer_angle
+        deg = 90+self.margin-(val/10)*self.max_steer_angle
         degrees = 2.5+deg*10/180
         self.steer.ChangeDutyCycle(degrees)
 
@@ -102,5 +103,8 @@ class CarController(object):
 
 if __name__ == '__main__':
     server = CarController()
-    server.forward()
-    server.destroy()
+    i = 10
+    while 1:
+        server.left_right(i)
+        time.sleep(0.2)
+        i *= -1
