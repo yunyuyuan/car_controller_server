@@ -21,7 +21,7 @@ class CarController(object):
         self.setup()
         self.speed_strength = 1
         self.max_steer_angle = 30
-        self.margin = -5
+        self.margin = -2.5
 
     @staticmethod
     def set_motor(w1, w2, w3, w4):

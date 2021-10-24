@@ -14,6 +14,11 @@ class BthClient(object):
 
             subprocess.call(['sudo', 'hciconfig', 'hci0', 'piscan'])
             self.controller = CarController()
+            self.client_socket = None
+
+            from camera import LiveCamera
+            self.camera = LiveCamera(callback=self.send_vide_stream)
+            self.camera.start()
         uuid = "00001101-0000-1000-8000-00805F9B34FB"
 
         bluetooth.advertise_service(self.server_sock, "CarServer",
@@ -24,15 +29,30 @@ class BthClient(object):
 
     def run(self):
         while 1:
-            client_sock, address = self.server_sock.accept()
+            self.client_socket, address = self.server_sock.accept()
+            self.camera.resume()
             print("Accepted connection from ", address)
             while 1:
                 try:
-                    data = eval(bytes.decode(client_sock.recv(1024), 'utf-8'))
+                    data = eval(bytes.decode(self.client_socket.recv(1024), 'utf-8'))
                     print(data)
                     if not self.just_connect:
                         self.controller.parse_req(data)
                 except SyntaxError:
                     pass
                 except bluetooth.btcommon.BluetoothError:
+                    print('disconnect')
+                    self.camera.pause()
                     break
+                except KeyboardInterrupt:
+                    try:
+                        self.controller.destroy()
+                        self.camera.stop()
+                    except Exception:
+                        pass
+                    print('Interrupt by user')
+                    exit(0)
+    
+    def send_vide_stream(self, s):
+        self.client_socket.send(s)
+
